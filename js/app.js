@@ -92,17 +92,24 @@ class TradingApp {
 
   prepareSymbolEditForm(index) {
     const symbol = this.symbolManager.getSymbol(index);
-
+  
     this.symbolNameInput.value = symbol.name;
     this.symbolPriceInput.value = symbol.currentPrice || "";
-
+  
+    // ذخیره index فعلی در یک متغیر
+    const currentIndex = index;
+  
     this.addSymbolBtn.textContent = "ویرایش نماد";
     this.addSymbolBtn.onclick = async () => {
       const name = this.symbolNameInput.value.trim();
       const currentPrice = this.symbolPriceInput.value.trim();
-
+  
       try {
-        await this.symbolManager.updateSymbol(index, name, currentPrice ? parseInt(currentPrice) : null);
+        await this.symbolManager.updateSymbol(
+          currentIndex, // استفاده از index ذخیره شده
+          name, 
+          currentPrice ? parseInt(currentPrice) : null
+        );
         this.clearSymbolInputs();
         this.addSymbolBtn.textContent = "ثبت نماد";
         this.addSymbolBtn.onclick = () => this.handleAddSymbol();
@@ -249,7 +256,7 @@ class TradingApp {
 
         <p>
           <span>ارزش روز:</span>
-          <span class="text-left">تنظیم نشده</span>
+          <span class="text-left"> نشده</span>
         </p>    
 
         <p class="text-gray-400">
@@ -261,16 +268,15 @@ class TradingApp {
           <span >ارزش خرید:</span>
           <span class="text-left">${symbolData.currentValue.toLocaleString()}</span>
         </p>    
+      </div>
 
-    `;
-
+      `;
+      
       if (currentPrice) {
         const profitLoss = (currentPrice - symbolData.avgPrice) * symbolData.amount;
         portfolioItem.innerHTML += `
         <span>قیمت روز:</span>
         <span class="text-left">${currentPrice.toLocaleString()}</span>
-        
-        <span>سود/زیان:</span>
         <span class="${profitLoss >= 0 ? "text-green-600" : "text-red-600"}">
           ${Math.abs(profitLoss).toLocaleString()}
           ${profitLoss >= 0 ? "(سود)" : "(زیان)"}

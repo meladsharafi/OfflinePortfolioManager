@@ -40,10 +40,7 @@ export class PortfolioManager {
 
     // 4. محاسبه ارزش کل نهایی
     for (const symbol in portfolio) {
-      const currentPrice = this.symbolManager.getCurrentPrice(symbol);
-      portfolio[symbol].currentValue = currentPrice
-        ? currentPrice * portfolio[symbol].amount
-        : portfolio[symbol].totalCost;
+      portfolio[symbol].currentValue =  portfolio[symbol].totalCost;
     }
 
     return portfolio;

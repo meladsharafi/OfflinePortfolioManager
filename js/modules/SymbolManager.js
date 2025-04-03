@@ -33,18 +33,21 @@ export class SymbolManager {
       throw new Error('لطفا نام نماد را وارد کنید');
     }
     
-    const normalizedNewName = name.trim().toLowerCase();
-    const symbolExists = this.symbols.some(
-      (s, i) => i !== index && s.name.trim().toLowerCase() === normalizedNewName
-    );
-    
-    if (symbolExists) {
-      throw new Error('این نماد قبلاً ثبت شده است');
+    // اگر نام نماد تغییر نکرده باشد، بررسی تکراری بودن را انجام نده
+    if (this.symbols[index].name.trim().toLowerCase() !== name.trim().toLowerCase()) {
+      const normalizedNewName = name.trim().toLowerCase();
+      const symbolExists = this.symbols.some(
+        (s, i) => i !== index && s.name.trim().toLowerCase() === normalizedNewName
+      );
+      
+      if (symbolExists) {
+        throw new Error('این نماد قبلاً ثبت شده است');
+      }
     }
     
     this.symbols[index] = { 
       name: name.trim(), 
-      currentPrice: currentPrice !== null ? Math.round(Number(currentPrice)) : null 
+      currentPrice: currentPrice !== null ? Math.round(Number(currentPrice)) : null
     };
     this.saveToStorage();
   }
