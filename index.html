@@ -21,7 +21,8 @@
         <div class="mb-4">
           <input type="text" id="symbolName" placeholder="نام نماد (مثلا: فولاد)" class="w-full p-2 border rounded">
           <input type="number" id="symbolPrice" placeholder="قیمت روز (اختیاری)" class="w-full p-2 border rounded mt-2">
-          <button id="addSymbolBtn" class="w-full bg-blue-500 text-white p-2 rounded mt-2 hover:bg-blue-600 duration-300">ثبت
+          <button id="addSymbolBtn"
+            class="w-full bg-blue-500 text-white p-2 rounded mt-2 hover:bg-blue-600 duration-300">ثبت
             نماد</button>
         </div>
         <div class="symbol-list space-y-2"></div>
@@ -33,24 +34,33 @@
         <div class="portfolio-summary flex flex-col gap-2"></div>
       </div>
 
-      <!-- بخش جدید تاریخچه معاملات -->
+      <!-- بخش جدید تاریخچه همه معاملات -->
       <div class="bg-white p-4 rounded-lg shadow">
         <h2 class="text-xl font-semibold mb-4">تاریخچه همه معاملات</h2>
         <div class="transaction-history space-y-2"></div>
       </div>
 
       <!-- بخش معاملات -->
+      <!-- بخش معاملات -->
       <div class="bg-white p-4 rounded-lg shadow">
         <h2 class="text-xl font-semibold mb-4">ثبت معامله</h2>
-        <div class="flex flex-col gap-2 mb-4">
+        <div class="flex flex-col gap-2">
           <select id="transactionSymbol" class="w-full p-2 border rounded">
             <option value="">انتخاب نماد</option>
           </select>
           <input type="number" id="transactionAmount" placeholder="مقدار" class="w-full p-2 border rounded">
           <input type="number" id="transactionPrice" placeholder="قیمت به ریال" class="w-full p-2 border rounded">
           <div class="flex gap-2">
-            <button id="buyBtn" class="flex-1 bg-green-500 text-white p-2 rounded  hover:bg-green-600 duration-300">خرید</button>
-            <button id="sellBtn" class="flex-1 bg-red-500 text-white p-2 rounded  hover:bg-red-600 duration-300">فروش</button>
+            <button id="buyBtn"
+              class="flex-1 bg-green-500 text-white p-2 rounded hover:bg-green-600 duration-300">خرید</button>
+            <button id="sellBtn"
+              class="flex-1 bg-red-500 text-white p-2 rounded hover:bg-red-600 duration-300">فروش</button>
+          </div>
+
+          <!-- بخش تراکنش‌های نماد انتخاب شده -->
+          <div id="symbolTransactions" class="mt-4 hidden">
+            <h3 class="text-sm font-medium mb-2">تراکنش‌های <span id="selectedSymbolName" class="font-bold"></span></h3>
+            <div id="symbolTransactionsList" class="space-y-2 max-h-40 overflow-y-auto text-xs"></div>
           </div>
         </div>
       </div>
