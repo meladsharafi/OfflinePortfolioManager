@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* --------------------------------------------------------- MY CSS -----------------------------------------*/
+@font-face {
+  font-family: "vzm";
+  src: url("../fonts/Vazir-Medium.ttf");
+}
+
+* {
+  font-family: "vzm", Arial, Helvetica, sans-serif;
+  box-sizing: border-box;
+}
+
+a {
+  text-decoration: none;
+}
+
+/* --------------------------------------------------------- Custom CSS -----------------------------------------*/
