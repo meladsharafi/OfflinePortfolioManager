@@ -237,7 +237,7 @@ class TradingApp {
       const currentPrice = this.symbolManager.getCurrentPrice(symbol);
 
       const portfolioItem = document.createElement("div");
-      portfolioItem.className = "portfolio-item p-2 border rounded-md";
+      portfolioItem.className = "portfolio-item p-2 border rounded-md hover:bg-gray-100 duration-300 cursor-pointer";
 
       portfolioItem.innerHTML = `
       <h3 class="">${symbol}</h3>
