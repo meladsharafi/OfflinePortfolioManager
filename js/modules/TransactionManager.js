@@ -1,3 +1,4 @@
+import { PortfolioManager } from './PortfolioManager.js';
 export class TransactionManager {
   // Constructor برای مقداردهی اولیه با symbolManager و بارگیری تراکنش‌ها از localStorage
   constructor(symbolManager) {
@@ -64,28 +65,17 @@ export class TransactionManager {
   // محاسبه سود حاصل از فروش
   calculateProfit(transaction) {
     if (transaction.type !== "sell") return 0;
-
-    // فیلتر تراکنش‌های خرید برای نماد مورد نظر
-    const buyTransactions = this.transactions.filter((t) => t.symbol === transaction.symbol && t.type === "buy");
-
-    // محاسبه مجموع مقدار و هزینه خریدها
-    const { totalAmount, totalCost } = buyTransactions.reduce(
-      (acc, buy) => {
-        return {
-          totalAmount: acc.totalAmount + buy.amount,
-          totalCost: acc.totalCost + buy.price,
-        };
-      },
-      { totalAmount: 0, totalCost: 0 }
-    );
-
-    if (totalAmount === 0) return 0;
-
-    // محاسبه میانگین قیمت خرید
-    const avgBuyPrice = Math.round(totalCost / totalAmount);
-    console.log(avgBuyPrice,'=',totalCost,'/',totalAmount)
-    // محاسبه سود (تفاوت قیمت فروش با میانگین قیمت خرید)
-    return transaction.price - (avgBuyPrice * transaction.amount);
+    
+    // دریافت وضعیت فعلی پرتفوی برای این نماد
+    const portfolio = new PortfolioManager(this.symbolManager, this).getPortfolio();
+    const symbolData = portfolio[transaction.symbol];
+    
+    // اگر نماد در پرتفوی وجود ندارد یا موجودی صفر است
+    if (!symbolData || symbolData.amount === 0) return 0;
+    
+    // محاسبه سود/زیان بر اساس میانگین قیمت خرید فعلی
+    const profit = transaction.price - (transaction.amount * symbolData.avgPrice);
+    return profit;
   }
 
   // به‌روزرسانی تراکنش موجود
@@ -159,6 +149,6 @@ export class TransactionManager {
     const totalAmount = buyTransactions.reduce((sum, t) => sum + t.amount, 0);
     const totalCost = buyTransactions.reduce((sum, t) => sum + t.amount * t.price, 0);
 
-    return Math.round(totalCost / totalAmount);
+    return totalCost / totalAmount;
   }
 }

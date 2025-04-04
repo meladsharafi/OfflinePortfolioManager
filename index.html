@@ -41,7 +41,7 @@
             <option value="">انتخاب نماد</option>
           </select>
           <input type="number" id="transactionAmount" placeholder="مقدار" class="w-full p-2 text-sm border rounded">
-          <input type="number" id="transactionPrice" placeholder="پرداختی به ریال" class="w-full p-2 text-sm border rounded">
+          <input type="number" id="transactionPrice" placeholder="مبلغ به ریال" class="w-full p-2 text-sm border rounded">
           <div class="flex gap-2">
             <button id="buyBtn"
               class="flex-1 bg-green-500 text-white p-2 text-sm rounded hover:bg-green-600 duration-300">خرید</button>
@@ -50,9 +50,9 @@
           </div>
 
           <!-- بخش تراکنش‌های نماد انتخاب شده -->
-          <div id="symbolTransactions" class="hidden">
+          <div id="symbolTransactions" class="hidden mt-2">
             <h3 class="text-sm font-medium mb-2">تراکنش‌های <span id="selectedSymbolName" class="font-semibold"></span></h3>
-            <div id="symbolTransactionsList" class="space-y-2 max-h-64 overflow-y-auto"></div>
+            <div id="symbolTransactionsList" class="pl-1 space-y-2 max-h-64 overflow-y-auto"></div>
           </div>
         </div>
       </div>

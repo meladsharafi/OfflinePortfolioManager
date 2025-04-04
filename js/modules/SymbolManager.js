@@ -29,7 +29,7 @@ export class SymbolManager {
     // افزودن نماد جدید به لیست
     this.symbols.push({ 
       name: name.trim(), 
-      currentPrice: currentPrice !== null ? Math.round(Number(currentPrice)) : null 
+      currentPrice: currentPrice !== null ? currentPrice : null 
     });
     this.saveToStorage();
   }
@@ -55,7 +55,7 @@ export class SymbolManager {
     // به‌روزرسانی اطلاعات نماد
     this.symbols[index] = { 
       name: name.trim(), 
-      currentPrice: currentPrice !== null ? Math.round(Number(currentPrice)) : null
+      currentPrice: currentPrice !== null ? currentPrice : null
     };
     this.saveToStorage();
   }
