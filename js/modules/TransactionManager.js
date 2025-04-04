@@ -83,8 +83,9 @@ export class TransactionManager {
 
     // محاسبه میانگین قیمت خرید
     const avgBuyPrice = Math.round(totalCost / totalAmount);
+    console.log(avgBuyPrice,'=',totalCost,'/',totalAmount)
     // محاسبه سود (تفاوت قیمت فروش با میانگین قیمت خرید)
-    return transaction.price - avgBuyPrice * transaction.amount;
+    return transaction.price - (avgBuyPrice * transaction.amount);
   }
 
   // به‌روزرسانی تراکنش موجود

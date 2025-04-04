@@ -293,96 +293,107 @@ class TradingApp {
   renderPortfolio() {
     this.portfolioSummary.innerHTML = "";
     const portfolio = this.portfolioManager.getPortfolio();
-    const allSymbols = this.symbolManager.getAllSymbols();
-  
-    // ایجاد یک مپ از نمادهای موجود در پرتفوی
-    const portfolioSymbols = new Set(Object.keys(portfolio));
-  
-    // اضافه کردن نمادهایی که در پرتفوی نیستند ولی در لیست نمادها وجود دارند
-    allSymbols.forEach(symbol => {
-      if (!portfolioSymbols.has(symbol.name)) {
-        portfolio[symbol.name] = {
-          amount: 0,
-          totalCost: 0,
-          avgPrice: 0,
-          currentValue: 0, // اضافه کردن این خط
-          isSoldOut: true
-        };
-      }
-    });
   
     if (Object.keys(portfolio).length === 0) {
       this.portfolioSummary.innerHTML = '<p class="text-gray-500">معامله ای ثبت نشده است.</p>';
       return;
     }
   
+    // جدا کردن نمادهای فعال و فروخته شده
+    const activeSymbols = [];
+    const soldOutSymbols = [];
+  
     for (const symbol in portfolio) {
-      const symbolData = portfolio[symbol];
-      const currentPrice = this.symbolManager.getCurrentPrice(symbol);
-  
-      const portfolioItem = document.createElement("div");
-      portfolioItem.className = "portfolio-item flex flex-col gap-2 p-2 border rounded-md hover:bg-gray-100 duration-300 cursor-pointer";
-      
-      portfolioItem.addEventListener("click", () => {
-        this.transactionSymbolSelect.value = symbol;
-        this.transactionSymbolSelect.dispatchEvent(new Event("change"));
-        document.querySelector("#transactionSymbol").scrollIntoView({
-          behavior: "smooth",
-        });
-      });
-  
-      if (symbolData.isSoldOut) {
-        portfolioItem.classList.add("bg-gray-50", "opacity-75");
+      if (portfolio[symbol].isSoldOut) {
+        soldOutSymbols.push({symbol, data: portfolio[symbol]});
+      } else {
+        activeSymbols.push({symbol, data: portfolio[symbol]});
       }
+    }
   
-      // تغییرات اصلی اینجا اعمال می‌شود:
-      const amount = symbolData.amount || 0;
-      const avgPrice = symbolData.avgPrice || 0;
-      const currentValue = symbolData.currentValue || 0;
-      const displayValue = currentPrice ? (currentPrice * amount).toLocaleString() : "تنظیم نشده";
+    // نمایش نمادهای فعال
+    activeSymbols.forEach(({symbol, data}) => {
+      this.createPortfolioItem(symbol, data);
+    });
   
-      portfolioItem.innerHTML = `
-      <h3 class="font-semibold ${symbolData.isSoldOut ? 'text-gray-500' : ''}">${symbol} ${symbolData.isSoldOut ? '(فروخته شده)' : ''}</h3>
-      <div class="grid grid-cols-2 gap-2">
-        <p class="text-gray-400">
-          <span>موجودی:</span>
-          <span class="text-left">${amount.toLocaleString()}</span>
-        </p>
-  
-        <p class="text-gray-400">
-          <span>ارزش روز:</span>
-          <span class="text-left">${displayValue}</span>
-        </p>    
-  
-        <p class="text-gray-400">
-          <span>میانگین قیمت خرید:</span>
-          <span class="text-left">${avgPrice.toLocaleString()}</span>
-        </p>     
-  
-        <p class="text-gray-400">
-          <span>ارزش خرید:</span>
-          <span class="text-left">${currentValue.toLocaleString()}</span>
-        </p>    
-      </div>
+    // اضافه کردن عنوان "نمادهای فروخته شده" اگر چنین نمادهایی وجود دارند
+    if (soldOutSymbols.length > 0) {
+      const soldOutHeader = document.createElement("div");
+      soldOutHeader.className = "mt-2";
+      soldOutHeader.innerHTML = `
+        <h3 class="text-sm font-semibold text-gray-700">نمادهای فروخته شده</h3>
       `;
-  
-      if (currentPrice && !symbolData.isSoldOut) {
-        const profitLoss = (currentPrice - avgPrice) * amount;
-        portfolioItem.innerHTML += `
-        <div>
-          <span>قیمت روز:</span>
-          <span class="text-left">${currentPrice.toLocaleString()} | </span>
-          <span class="${profitLoss >= 0 ? "text-green-500" : "text-red-500"}">
-            ${Math.abs(profitLoss).toLocaleString()}
-            ${profitLoss >= 0 ? "(سود)" : "(زیان)"}
-          </span>
-        </div>
-        `;
-      }
-  
-      this.portfolioSummary.appendChild(portfolioItem);
+      this.portfolioSummary.appendChild(soldOutHeader);
+      
+      // نمایش نمادهای فروخته شده
+      soldOutSymbols.forEach(({symbol, data}) => {
+        this.createPortfolioItem(symbol, data);
+      });
     }
   }
+  
+  // تابع جداگانه برای ایجاد آیتم پرتفوی
+  createPortfolioItem(symbol, data) {
+    const currentPrice = this.symbolManager.getCurrentPrice(symbol);
+    const portfolioItem = document.createElement("div");
+    portfolioItem.className = `portfolio-item flex flex-col gap-2 p-2 border rounded-md hover:bg-gray-100 duration-300 cursor-pointer`;
+    
+    portfolioItem.addEventListener("click", () => {
+      this.transactionSymbolSelect.value = symbol;
+      this.transactionSymbolSelect.dispatchEvent(new Event("change"));
+      document.querySelector("#transactionSymbol").scrollIntoView({
+        behavior: "smooth",
+      });
+    });
+  
+    const amount = data.amount || 0;
+    const avgPrice = data.avgPrice || 0;
+    const currentValue = data.currentValue || 0;
+    const displayValue = currentPrice ? (currentPrice * amount).toLocaleString() : "تنظیم نشده";
+  
+    portfolioItem.innerHTML = `
+    <h4 class="font-semibold text-gray-700">${symbol}</h4>
+    <div class="grid grid-cols-2 gap-2">
+      <p class="text-gray-500">
+        <span>موجودی:</span>
+        <span class="text-left">${amount.toLocaleString()}</span>
+      </p>
+  
+      <p class="text-gray-500">
+        <span>ارزش روز:</span>
+        <span class="text-left">${displayValue}</span>
+      </p>    
+  
+      <p class="text-gray-500">
+        <span>میانگین قیمت خرید:</span>
+        <span class="text-left">${avgPrice.toLocaleString()}</span>
+      </p>     
+  
+      <p class="text-gray-500">
+        <span>پرداختی:</span>
+        <span class="text-left">${currentValue.toLocaleString()}</span>
+      </p>    
+    </div>
+    `;
+  
+    if (currentPrice && !data.isSoldOut) {
+      const profitLoss = (currentPrice - avgPrice) * amount;
+      portfolioItem.innerHTML += `
+      <div>
+        <span>قیمت روز:</span>
+        <span class="text-left">${currentPrice.toLocaleString()} | </span>
+        <span class="${profitLoss >= 0 ? "text-green-500" : "text-red-500"}">
+          ${Math.abs(profitLoss).toLocaleString()}
+          ${profitLoss >= 0 ? "(سود)" : "(زیان)"}
+        </span>
+      </div>
+      `;
+    }
+  
+    this.portfolioSummary.appendChild(portfolioItem);
+  }
+
+
   clearSymbolInputs() {
     this.symbolNameInput.value = "";
     this.symbolPriceInput.value = "";
