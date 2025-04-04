@@ -45,6 +45,15 @@ class TradingApp {
     this.transactionSymbolSelect.addEventListener("change", (e) => {
       this.renderSymbolTransactions(e.target.value);
     });
+
+    // اضافه کردن event listener برای دکمه‌های حذف در بخش ثبت معامله
+    document.addEventListener("click", (e) => {
+      if (e.target.classList.contains("delete-btn") && e.target.closest("#symbolTransactionsList")) {
+        const index = parseInt(e.target.getAttribute("data-id"));
+        const symbol = this.transactionSymbolSelect.value;
+        this.handleDeleteTransaction(index, symbol);
+      }
+    });
   }
 
   async handleAddSymbol() {
@@ -69,7 +78,15 @@ class TradingApp {
       const success = await this.transactionManager.addTransaction(type, symbol, amount, price);
       if (success) {
         this.clearTransactionInputs();
+
+        // به‌روزرسانی همه بخش‌ها
         this.renderAll();
+
+        // به‌روزرسانی خاص بخش تراکنش‌های نماد انتخاب شده
+        this.renderSymbolTransactions(symbol);
+
+        // فوکوس خودکار به فیلد مقدار
+        this.transactionAmountInput.focus();
       }
     } catch (error) {
       alert(error.message);
@@ -167,6 +184,8 @@ class TradingApp {
           this.buyBtn.style.display = "block";
           this.sellBtn.style.display = "block";
           this.renderAll();
+          // به‌روزرسانی خاص بخش تراکنش‌های نماد انتخاب شده
+          this.renderSymbolTransactions(symbol);
         }
       } catch (error) {
         alert(error.message);
@@ -177,26 +196,33 @@ class TradingApp {
   }
 
   renderAll() {
+    const currentSymbol = this.transactionSymbolSelect.value;
+
     this.renderSymbols();
     this.renderPortfolio();
-    this.renderTransactionHistory(); // تابع جدید
+    this.renderTransactionHistory();
+
+    // بازگرداندن نماد انتخاب شده
+    if (currentSymbol) {
+      this.transactionSymbolSelect.value = currentSymbol;
+      this.renderSymbolTransactions(currentSymbol);
+    }
   }
 
   renderSymbols() {
-    this.symbolList.innerHTML = "";
+    this.symbolList.innerHTML = "<h3 class='text-sm font-semibold'>لیست نمادها</h3>";
     const symbols = this.symbolManager.getAllSymbols();
-
+    if (symbols.length === 0) return;
     symbols.forEach((symbol, index) => {
       const symbolItem = document.createElement("div");
-      symbolItem.className = "symbol-item cursor-pointer"; // تغییر این خط
+      symbolItem.className = "symbol-item p-2 flex justify-between text-sm border rounded-md cursor-pointer hover:bg-gray-100 duration-300";
       symbolItem.innerHTML = `
-      <div class="p-2 flex justify-between border rounded-md hover:bg-gray-100 duration-300">
         <span class="symbol-name">${symbol.name} ${symbol.currentPrice ? `(${symbol.currentPrice})` : ""}</span>
           <div class="">
-            <button class="edit-btn text-gray-400 hover:text-gray-700 duration-300" data-id="${index}">ویرایش</button>
-            <button class="delete-btn text-gray-400 hover:text-gray-700 duration-300" data-id="${index}">حذف</button>
+            <button class="edit-btn  text-gray-500 hover:text-gray-700 duration-300" data-id="${index}">ویرایش</button>
+            <button class="delete-btn  text-gray-500 hover:text-gray-700 duration-300" data-id="${index}">حذف</button>
           </div>
-        </div>
+      
       `;
       this.symbolList.appendChild(symbolItem);
     });
@@ -216,35 +242,16 @@ class TradingApp {
 
   renderTransactionHistory() {
     this.transactionHistory.innerHTML = "";
-    const transactions = [...this.transactionManager.getAllTransactions()].reverse(); // تغییر این خط
-  
-    transactions.forEach((transaction) => { // حذف index از پارامترها
+    const transactions = [...this.transactionManager.getAllTransactions()].reverse().map((t, index) => ({ ...t, originalIndex: index }));
+
+    if (transactions.length === 0) {
+      this.transactionHistory.innerHTML = '<p class="text-gray-500 p-1 text-xs">معامله‌ای ثبت نشده است.</p>';
+      return;
+    }
+
+    transactions.forEach((transaction) => {
       const transactionItem = document.createElement("div");
-      transactionItem.className = "transaction-item p-2 rounded-md text-xs " + 
-        `${transaction.type === "buy" ? "bg-green-100 text-green-900" : "bg-red-100 text-red-900"}`;
-  
-      let profitInfo = "";
-      if (transaction.type === "sell" && transaction.profit !== undefined) {
-        profitInfo = ` | ${transaction.profit >= 0 ? "سود" : "زیان"}: ${Math.abs(transaction.profit).toLocaleString()}`;
-      }
-  
-      transactionItem.innerHTML = `
-        <div class="">
-          ${transaction.type === "buy" ? "خرید" : "فروش"} 
-          ${transaction.amount}
-          عدد
-          <span class="font-semibold">${transaction.symbol}</span>
-          <div class="flex justify-between">
-            <p>
-              به مبلغ: 
-              ${transaction.price.toLocaleString()}${profitInfo}
-            </p>
-            <p>
-              ${new Date(transaction.date).toLocaleString('fa-IR')} <!-- اضافه کردن تاریخ معامله -->
-            </p>
-          </div>
-        </div>
-      `;
+      transactionItem.innerHTML = this.getTransactionTemplate(transaction, true);
       this.transactionHistory.appendChild(transactionItem);
     });
   }
@@ -259,43 +266,24 @@ class TradingApp {
       return;
     }
 
-    const transactions = this.transactionManager
-      .getAllTransactions()
+    const allTransactions = this.transactionManager.getAllTransactions();
+    const transactions = allTransactions
+      .map((t, originalIndex) => ({ ...t, originalIndex }))
       .filter((t) => t.symbol === symbol)
-      .reverse(); // جدیدترین تراکنش‌ها اول نمایش داده شوند
+      .reverse();
 
     symbolNameElement.textContent = symbol;
     transactionsList.innerHTML = "";
 
     if (transactions.length === 0) {
-      transactionsList.innerHTML = '<p class="text-gray-500 p-2">تراکنشی برای این نماد یافت نشد</p>';
+      transactionsList.innerHTML = '<p class="text-gray-500 p-1 text-xs">تراکنشی برای این نماد یافت نشد.</p>';
       container.classList.remove("hidden");
       return;
     }
 
-    transactions.forEach((transaction, index) => {
+    transactions.forEach((transaction) => {
       const transactionItem = document.createElement("div");
-      transactionItem.className = `p-2 rounded-md ${transaction.type === "buy" ? "bg-green-100 text-green-900" : "bg-red-50 text-red-900"}`;
-
-      let profitInfo = "";
-      if (transaction.type === "sell" && transaction.profit !== undefined) {
-        profitInfo = ` | ${transaction.profit >= 0 ? "سود" : "زیان"}: ${Math.abs(transaction.profit).toLocaleString()}`;
-      }
-
-      transactionItem.innerHTML = `
-        <div class="flex justify-between items-center">
-          <div>
-            ${transaction.type === "buy" ? "خرید" : "فروش"} 
-            ${transaction.amount} عدد 
-            <span>به مبلغ:  ${transaction.price.toLocaleString()} ${profitInfo}</span>
-          </div>
-          <div>
-            <button class="edit-btn text-gray-400 hover:text-gray-600 ml-2" data-id="${index}">ویرایش</button>
-            <button class="delete-btn text-gray-400 hover:text-gray-600" data-id="${index}">حذف</button>
-          </div>
-        </div>
-      `;
-
+      transactionItem.innerHTML = this.getTransactionTemplate(transaction, true);
       transactionsList.appendChild(transactionItem);
     });
 
@@ -305,61 +293,96 @@ class TradingApp {
   renderPortfolio() {
     this.portfolioSummary.innerHTML = "";
     const portfolio = this.portfolioManager.getPortfolio();
-
+    const allSymbols = this.symbolManager.getAllSymbols();
+  
+    // ایجاد یک مپ از نمادهای موجود در پرتفوی
+    const portfolioSymbols = new Set(Object.keys(portfolio));
+  
+    // اضافه کردن نمادهایی که در پرتفوی نیستند ولی در لیست نمادها وجود دارند
+    allSymbols.forEach(symbol => {
+      if (!portfolioSymbols.has(symbol.name)) {
+        portfolio[symbol.name] = {
+          amount: 0,
+          totalCost: 0,
+          avgPrice: 0,
+          currentValue: 0, // اضافه کردن این خط
+          isSoldOut: true
+        };
+      }
+    });
+  
     if (Object.keys(portfolio).length === 0) {
-      this.portfolioSummary.innerHTML = '<p class="text-gray-500">هنوز معامله‌ای ثبت نشده است.</p>';
+      this.portfolioSummary.innerHTML = '<p class="text-gray-500">معامله ای ثبت نشده است.</p>';
       return;
     }
-
+  
     for (const symbol in portfolio) {
       const symbolData = portfolio[symbol];
       const currentPrice = this.symbolManager.getCurrentPrice(symbol);
-
+  
       const portfolioItem = document.createElement("div");
-      portfolioItem.className = "portfolio-item p-2 border rounded-md hover:bg-gray-100 duration-300 cursor-pointer";
-
+      portfolioItem.className = "portfolio-item flex flex-col gap-2 p-2 border rounded-md hover:bg-gray-100 duration-300 cursor-pointer";
+      
+      portfolioItem.addEventListener("click", () => {
+        this.transactionSymbolSelect.value = symbol;
+        this.transactionSymbolSelect.dispatchEvent(new Event("change"));
+        document.querySelector("#transactionSymbol").scrollIntoView({
+          behavior: "smooth",
+        });
+      });
+  
+      if (symbolData.isSoldOut) {
+        portfolioItem.classList.add("bg-gray-50", "opacity-75");
+      }
+  
+      // تغییرات اصلی اینجا اعمال می‌شود:
+      const amount = symbolData.amount || 0;
+      const avgPrice = symbolData.avgPrice || 0;
+      const currentValue = symbolData.currentValue || 0;
+      const displayValue = currentPrice ? (currentPrice * amount).toLocaleString() : "تنظیم نشده";
+  
       portfolioItem.innerHTML = `
-      <h3 class="">${symbol}</h3>
-      <div class="grid grid-cols-2 gap-2 mt-2 text-sm">
-        <p>
+      <h3 class="font-semibold ${symbolData.isSoldOut ? 'text-gray-500' : ''}">${symbol} ${symbolData.isSoldOut ? '(فروخته شده)' : ''}</h3>
+      <div class="grid grid-cols-2 gap-2">
+        <p class="text-gray-400">
           <span>موجودی:</span>
-          <span class="text-left">${symbolData.amount.toLocaleString()}</span>
+          <span class="text-left">${amount.toLocaleString()}</span>
         </p>
-
-        <p>
+  
+        <p class="text-gray-400">
           <span>ارزش روز:</span>
-          <span class="text-left"> نشده</span>
+          <span class="text-left">${displayValue}</span>
         </p>    
-
+  
         <p class="text-gray-400">
           <span>میانگین قیمت خرید:</span>
-          <span class="text-left">${symbolData.avgPrice.toLocaleString()}</span>
+          <span class="text-left">${avgPrice.toLocaleString()}</span>
         </p>     
-
+  
         <p class="text-gray-400">
-          <span >ارزش خرید:</span>
-          <span class="text-left">${symbolData.currentValue.toLocaleString()}</span>
+          <span>ارزش خرید:</span>
+          <span class="text-left">${currentValue.toLocaleString()}</span>
         </p>    
       </div>
-
       `;
-
-      if (currentPrice) {
-        const profitLoss = (currentPrice - symbolData.avgPrice) * symbolData.amount;
+  
+      if (currentPrice && !symbolData.isSoldOut) {
+        const profitLoss = (currentPrice - avgPrice) * amount;
         portfolioItem.innerHTML += `
-        <span>قیمت روز:</span>
-        <span class="text-left">${currentPrice.toLocaleString()}</span>
-        <span class="${profitLoss >= 0 ? "text-green-600" : "text-red-600"}">
-          ${Math.abs(profitLoss).toLocaleString()}
-          ${profitLoss >= 0 ? "(سود)" : "(زیان)"}
-        </span>
-      `;
+        <div>
+          <span>قیمت روز:</span>
+          <span class="text-left">${currentPrice.toLocaleString()} | </span>
+          <span class="${profitLoss >= 0 ? "text-green-500" : "text-red-500"}">
+            ${Math.abs(profitLoss).toLocaleString()}
+            ${profitLoss >= 0 ? "(سود)" : "(زیان)"}
+          </span>
+        </div>
+        `;
       }
-
+  
       this.portfolioSummary.appendChild(portfolioItem);
     }
   }
-
   clearSymbolInputs() {
     this.symbolNameInput.value = "";
     this.symbolPriceInput.value = "";
@@ -368,7 +391,59 @@ class TradingApp {
   clearTransactionInputs() {
     this.transactionAmountInput.value = "";
     this.transactionPriceInput.value = "";
-    this.transactionSymbolSelect.value = "";
+    // this.transactionSymbolSelect.value = "";
+  }
+  getTransactionTemplate(transaction, showActions = true) {
+    let profitInfo = "";
+    if (transaction.type === "sell" && transaction.profit !== undefined) {
+      profitInfo = ` | ${transaction.profit >= 0 ? "سود" : "زیان"}: ${Math.abs(transaction.profit).toLocaleString()}`;
+    }
+
+    const date = new Date(transaction.date).toLocaleString("fa-IR");
+    const typeClass = transaction.type === "buy" ? "bg-green-50" : "bg-red-50";
+
+    const actions = showActions
+      ? `
+      <div class="flex gap-1">
+        <button class="edit-btn text-gray-500 hover:text-gray-700 duration-300" data-id="${transaction.originalIndex}">
+          ویرایش
+        </button>
+        <button class="delete-btn text-gray-500 hover:text-gray-700 duration-300" data-id="${transaction.originalIndex}">
+          حذف
+        </button>
+      </div>
+    `
+      : "";
+
+    return `
+      <div class="${typeClass} p-2 rounded-md text-xs">
+          <div class="flex flex-col gap-2">
+          <div class="flex justify-between">
+          <span class="">
+            ${transaction.type === "buy" ? "خرید" : "فروش"} 
+            ${transaction.amount.toLocaleString()}
+            عدد 
+            ${transaction.symbol}
+          </span>
+          ${actions}
+          </div>
+            <div class="flex gap-2 justify-between">
+              <span>
+              قیمت: 
+              ${transaction.price.toLocaleString()} 
+              ${profitInfo}
+              </span>
+              <span class="text-gray-500">${date}</span>
+            </div>
+          </div>
+      </div>
+    `;
+  }
+
+  handleDeleteTransaction(index, symbol) {
+    this.transactionManager.deleteTransaction(index);
+    this.renderAll();
+    this.renderSymbolTransactions(symbol); // به‌روزرسانی لیست تراکنش‌های نماد
   }
 }
 

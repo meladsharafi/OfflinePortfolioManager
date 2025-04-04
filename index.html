@@ -16,53 +16,51 @@
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
       <!-- بخش نمادها -->
-      <div class="bg-white p-4 rounded-lg shadow">
-        <h2 class="text-xl font-semibold mb-4">مدیریت نمادها</h2>
-        <div class="mb-4">
-          <input type="text" id="symbolName" placeholder="نام نماد (مثلا: فولاد)" class="w-full p-2 border rounded">
-          <input type="number" id="symbolPrice" placeholder="قیمت روز (اختیاری)" class="w-full p-2 border rounded mt-2">
+      <div class="flex flex-col gap-2 bg-white p-4 rounded-lg shadow-lg">
+        <h2 class="text-xl font-semibold ">مدیریت نمادها</h2>
+        <div class="flex flex-col gap-2">
+          <input type="text" id="symbolName" placeholder="نام نماد (مثلا: فولاد)" class="w-full p-2 text-sm border rounded">
+          <input type="number" id="symbolPrice" placeholder="قیمت روز (اختیاری)" class="w-full p-2 text-sm border rounded">
           <button id="addSymbolBtn"
-            class="w-full bg-blue-500 text-white p-2 rounded mt-2 hover:bg-blue-600 duration-300">ثبت
-            نماد</button>
+            class="w-full p-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 duration-300">ثبت نماد</button>
         </div>
-        <div class="symbol-list space-y-2"></div>
+        <div class="symbol-list flex flex-col gap-2"></div>
       </div>
 
       <!-- بخش موجودی -->
-      <div class="bg-white p-4 rounded-lg shadow">
+      <div class="bg-white p-4 rounded-lg shadow-lg">
         <h2 class="text-xl font-semibold mb-4">پرتفوی</h2>
-        <div class="portfolio-summary flex flex-col gap-2"></div>
+        <div class="portfolio-summary flex flex-col gap-2 text-xs"></div>
       </div>
 
-      <!-- بخش جدید تاریخچه همه معاملات -->
-      <div class="bg-white p-4 rounded-lg shadow">
-        <h2 class="text-xl font-semibold mb-4">تاریخچه همه معاملات</h2>
-        <div class="transaction-history space-y-2"></div>
-      </div>
-
-      <!-- بخش معاملات -->
-      <!-- بخش معاملات -->
-      <div class="bg-white p-4 rounded-lg shadow">
+      <!-- ثبت معامله -->
+      <div class="bg-white p-4 rounded-lg shadow-lg">
         <h2 class="text-xl font-semibold mb-4">ثبت معامله</h2>
         <div class="flex flex-col gap-2">
-          <select id="transactionSymbol" class="w-full p-2 border rounded">
+          <select id="transactionSymbol" class="w-full p-2 text-sm border rounded">
             <option value="">انتخاب نماد</option>
           </select>
-          <input type="number" id="transactionAmount" placeholder="مقدار" class="w-full p-2 border rounded">
-          <input type="number" id="transactionPrice" placeholder="قیمت به ریال" class="w-full p-2 border rounded">
+          <input type="number" id="transactionAmount" placeholder="مقدار" class="w-full p-2 text-sm border rounded">
+          <input type="number" id="transactionPrice" placeholder="پرداختی به ریال" class="w-full p-2 text-sm border rounded">
           <div class="flex gap-2">
             <button id="buyBtn"
-              class="flex-1 bg-green-500 text-white p-2 rounded hover:bg-green-600 duration-300">خرید</button>
+              class="flex-1 bg-green-500 text-white p-2 text-sm rounded hover:bg-green-600 duration-300">خرید</button>
             <button id="sellBtn"
-              class="flex-1 bg-red-500 text-white p-2 rounded hover:bg-red-600 duration-300">فروش</button>
+              class="flex-1 bg-red-500 text-white p-2 text-sm rounded hover:bg-red-600 duration-300">فروش</button>
           </div>
 
           <!-- بخش تراکنش‌های نماد انتخاب شده -->
-          <div id="symbolTransactions" class="mt-4 hidden">
-            <h3 class="text-sm font-medium mb-2">تراکنش‌های <span id="selectedSymbolName" class="font-bold"></span></h3>
-            <div id="symbolTransactionsList" class="space-y-2 max-h-40 overflow-y-auto text-xs"></div>
+          <div id="symbolTransactions" class="hidden">
+            <h3 class="text-sm font-medium mb-2">تراکنش‌های <span id="selectedSymbolName" class="font-semibold"></span></h3>
+            <div id="symbolTransactionsList" class="space-y-2 max-h-64 overflow-y-auto"></div>
           </div>
         </div>
+      </div>
+
+      <!-- بخش جدید تاریخچه همه معاملات -->
+      <div class="bg-white p-4 rounded-lg shadow-lg">
+        <h2 class="text-xl font-semibold mb-4">تاریخچه همه معاملات</h2>
+        <div class="transaction-history space-y-2 max-h-64 overflow-y-auto"></div>
       </div>
 
     </div>
