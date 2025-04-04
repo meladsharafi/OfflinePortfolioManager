@@ -601,12 +601,12 @@ video {
   margin-bottom: 2rem;
 }
 
-.mb-2 {
-  margin-bottom: 0.5rem;
-}
-
 .mt-2 {
   margin-top: 0.5rem;
+}
+
+.mb-2 {
+  margin-bottom: 0.5rem;
 }
 
 .block {
@@ -755,8 +755,8 @@ video {
   padding: 0.25rem;
 }
 
-.pl-1 {
-  padding-left: 0.25rem;
+.pr-2 {
+  padding-right: 0.5rem;
 }
 
 .text-left {
@@ -861,6 +861,14 @@ a {
 }
 
 /* --------------------------------------------------------- Custom CSS -----------------------------------------*/
+
+.scroll-stable{
+  scrollbar-gutter:stable;
+}
+
+.scroll-thin{
+  scrollbar-width:thin;
+}
 
 .hover\:bg-blue-600:hover {
   --tw-bg-opacity: 1;

@@ -61,7 +61,7 @@ class TradingApp {
     const currentPrice = this.symbolPriceInput.value.trim();
 
     try {
-      await this.symbolManager.addSymbol(name, currentPrice ? parseInt(currentPrice) : null);
+      await this.symbolManager.addSymbol(name, currentPrice ? parseFloat(currentPrice) : null);
       this.clearSymbolInputs();
       this.renderAll();
     } catch (error) {
@@ -210,7 +210,7 @@ class TradingApp {
   }
 
   renderSymbols() {
-    this.symbolList.innerHTML = "<h3 class='text-sm font-semibold'>لیست نمادها</h3>";
+    this.symbolList.innerHTML = "";
     const symbols = this.symbolManager.getAllSymbols();
     if (symbols.length === 0) return;
     symbols.forEach((symbol, index) => {
@@ -221,8 +221,7 @@ class TradingApp {
           <div class="">
             <button class="edit-btn  text-gray-500 hover:text-gray-700 duration-300" data-id="${index}">ویرایش</button>
             <button class="delete-btn  text-gray-500 hover:text-gray-700 duration-300" data-id="${index}">حذف</button>
-          </div>
-      
+          </div>      
       `;
       this.symbolList.appendChild(symbolItem);
     });
@@ -356,7 +355,7 @@ class TradingApp {
     <div class="grid grid-cols-2 gap-2">
       <p class="text-gray-500">
         <span>موجودی:</span>
-        <span class="text-left">${amount.toLocaleString()}</span>
+        <span class="text-left">${amount}</span>
       </p>
   
       <p class="text-gray-500">
@@ -432,7 +431,7 @@ class TradingApp {
           <div class="flex justify-between">
           <span class="">
             ${transaction.type === "buy" ? "خرید" : "فروش"} 
-            ${transaction.amount.toLocaleString()}
+            ${transaction.amount}
             عدد 
             ${transaction.symbol}
           </span>

@@ -15,8 +15,8 @@ export class TransactionManager {
   addTransaction(type, symbol, amount, price) {
     this.validateInputs(type, symbol, amount, price); // اعتبارسنجی ورودی‌ها
 
-    const amountNum = Number(amount);
-    const priceNum = Number(price);
+    const amountNum = parseFloat(amount);
+    const priceNum = parseFloat(price);
 
     // بررسی موجودی کافی برای فروش
     if (type === "sell") {
@@ -51,7 +51,7 @@ export class TransactionManager {
       throw new Error("لطفا نماد را انتخاب کنید");
     }
 
-    const amountNum = Number(amount);
+    const amountNum = parseFloat(amount);
     if (isNaN(amountNum) || amountNum <= 0) {
       throw new Error("لطفا مقدار معتبر وارد کنید");
     }

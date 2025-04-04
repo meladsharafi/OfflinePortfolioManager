@@ -18,3 +18,9 @@ a {
 }
 
 /* --------------------------------------------------------- Custom CSS -----------------------------------------*/
+.scroll-stable{
+  scrollbar-gutter:stable;
+}
+.scroll-thin{
+  scrollbar-width:thin;
+}
