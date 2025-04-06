@@ -1,3 +1,6 @@
+
+//This file Location is: js/modules/TransactinManager.js
+
 import { PortfolioManager } from './PortfolioManager.js';
 export class TransactionManager {
   // Constructor برای مقداردهی اولیه با symbolManager و بارگیری تراکنش‌ها از localStorage

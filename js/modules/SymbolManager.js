@@ -1,3 +1,5 @@
+//This file Location is: js/modules/SymbolManager.js
+
 export class SymbolManager {
   // Constructor برای مقداردهی اولیه و بارگیری نمادها از localStorage
   constructor() {

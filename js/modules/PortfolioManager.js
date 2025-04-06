@@ -1,3 +1,4 @@
+//This file Location is: js/modules/PortfolioManager.js
 export class PortfolioManager {
   constructor(symbolManager, transactionManager) {
     this.symbolManager = symbolManager;
@@ -6,8 +7,25 @@ export class PortfolioManager {
 
   getPortfolio() {
     const portfolio = {};
-    const transactions = [...this.transactionManager.getAllTransactions()]
-    .sort((a, b) => new Date(a.date) - new Date(b.date));
+    const transactions = [...this.transactionManager.getAllTransactions()].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    //محاسبه مجموع سود فروش
+    transactions.forEach((t) => {
+      if (t.type === "sell" && t.profit !== undefined) {
+        if (!portfolio[t.symbol]) {
+          portfolio[t.symbol] = {
+            totalProfit: 0,
+            hasTrades: true,
+            amount: 0,
+            totalCost: 0,
+            avgPrice: 0,
+            isSoldOut: false,
+            hasTrades: true,
+          };
+        }
+        portfolio[t.symbol].totalProfit += t.profit;
+      }
+    });
 
     // پردازش تراکنش‌ها بدون مرتب‌سازی زمانی
     transactions.forEach((t) => {
