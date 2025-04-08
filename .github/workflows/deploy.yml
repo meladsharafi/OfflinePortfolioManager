@@ -19,27 +19,19 @@
 #           server: ${{ secrets.FTP_SERVER }} 
 #           username: ${{ secrets.FTP_USERNAME }} 
 #           password: ${{ secrets.FTP_PASSWORD }}
-name: Deploy website on push
-
-on:
-  push:
-    branches:
-      - main
-
+on: push
+name: 🚀 Deploy website on push
 jobs:
   web-deploy:
-    name: Deploy
+    name: 🎉 Deploy
     runs-on: ubuntu-latest
-
     steps:
-      - name: Get latest code
-        uses: actions/checkout@v3
-
-      - name: Install FTP client
-        run: sudo apt-get update && sudo apt-get install -y lftp
-
-      - name: Upload to FTP server
-        run: |
-          lftp -c "set ftp:list-options -a; open -u ${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }} ${{ secrets.FTP_SERVER }}; mirror -R --delete --verbose ./ public_html"
-
-
+    - name: 🚚 Get latest code
+      uses: actions/checkout@v4
+    
+    - name: 📂 Sync files
+      uses: meladsharafi/VirtualPortfolio@main
+      with:
+        server: ${{ secrets.FTP_SERVER }} 
+        username:  ${{ secrets.FTP_USERNAME }} 
+        password: ${{ secrets.FTP_PASSWORD }}
