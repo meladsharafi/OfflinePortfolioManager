@@ -30,6 +30,7 @@ jobs:
   web-deploy:
     name: Deploy
     runs-on: ubuntu-latest
+
     steps:
       - name: Get latest code
         uses: actions/checkout@v3
@@ -39,6 +40,6 @@ jobs:
 
       - name: Upload to FTP server
         run: |
-          lftp -c "set ftp:list-options -a;
-          open -u ${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }} ${{ secrets.FTP_SERVER }};
-          mirror -R --delete --verbose ./ public_html"
+          lftp -c "set ftp:list-options -a; open -u ${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }} ${{ secrets.FTP_SERVER }}; mirror -R --delete --verbose ./ public_html"
+
+
