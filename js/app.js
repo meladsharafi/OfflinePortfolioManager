@@ -56,6 +56,13 @@ class TradingApp {
         this.handleDeleteTransaction(index, symbol);
       }
     });
+
+    document.addEventListener("click", (e) => {
+      if (e.target.classList.contains("edit-btn") && e.target.closest("#symbolTransactionsList")) {
+        const index = e.target.getAttribute("data-id");
+        this.prepareTransactionEditForm(index);
+      }
+    });
   }
 
   async handleAddSymbol() {
@@ -104,16 +111,11 @@ class TradingApp {
       const index = e.target.getAttribute("data-id");
       this.prepareSymbolEditForm(index);
     } else if (e.target.closest(".symbol-item")) {
-      // کلیک روی خود نماد
       const index = e.target.closest(".symbol-item").querySelector(".edit-btn").getAttribute("data-id");
       const symbol = this.symbolManager.getSymbol(index);
       this.transactionSymbolSelect.value = symbol.name;
       this.transactionSymbolSelect.dispatchEvent(new Event("change"));
-
-      // اسکرول به بخش معاملات
-      document.querySelector("#transactionSymbol").scrollIntoView({
-        behavior: "smooth",
-      });
+      document.querySelector(".transaction-box").scrollIntoView({ behavior: "smooth" });
     }
   }
 
@@ -122,13 +124,12 @@ class TradingApp {
       const index = e.target.getAttribute("data-id");
       this.transactionManager.deleteTransaction(index);
       this.renderAll();
+      this.renderSymbolTransactions(this.transactionSymbolSelect.value);
     } else if (e.target.classList.contains("edit-btn")) {
       const index = e.target.getAttribute("data-id");
       this.prepareTransactionEditForm(index);
     }
-    this.renderSymbolTransactions(this.transactionSymbolSelect.value);
   }
-
   prepareSymbolEditForm(index) {
     const symbol = this.symbolManager.getSymbol(index);
 
@@ -159,43 +160,98 @@ class TradingApp {
     };
   }
 
-  prepareTransactionEditForm(index) {
-    const transaction = this.transactionManager.getTransaction(index);
+prepareTransactionEditForm(index) {
+  const transaction = this.transactionManager.getTransaction(index);
 
-    this.transactionSymbolSelect.value = transaction.symbol;
-    this.transactionAmountInput.value = transaction.amount;
-    this.transactionPriceInput.value = transaction.price;
+  // پر کردن فرم با اطلاعات تراکنش
+  this.transactionSymbolSelect.value = transaction.symbol;
+  this.transactionAmountInput.value = transaction.amount;
+  this.transactionPriceInput.value = transaction.price;
 
-    this.buyBtn.style.display = "none";
-    this.sellBtn.style.display = "none";
+  // غیرفعال کردن انتخاب نماد هنگام ویرایش
+  this.transactionSymbolSelect.disabled = true;
 
-    const updateBtn = document.createElement("button");
-    updateBtn.textContent = "ویرایش معامله";
-    updateBtn.className = "w-full bg-yellow-500 text-white p-2 rounded hover:bg-yellow-600";
+  // مخفی کردن دکمه‌های خرید و فروش
+  this.buyBtn.style.display = "none";
+  this.sellBtn.style.display = "none";
 
-    updateBtn.onclick = async () => {
-      const symbol = this.transactionSymbolSelect.value;
-      const amount = this.transactionAmountInput.value.trim();
-      const price = this.transactionPriceInput.value.trim();
+  // ایجاد دکمه‌های ثبت و لغو ویرایش
+  const buttonsContainer = document.createElement("div");
+  buttonsContainer.className = "flex w-full gap-2";
 
-      try {
-        const success = await this.transactionManager.updateTransaction(index, symbol, amount, price);
-        if (success) {
-          this.clearTransactionInputs();
-          updateBtn.remove();
-          this.buyBtn.style.display = "block";
-          this.sellBtn.style.display = "block";
-          this.renderAll();
-          // به‌روزرسانی خاص بخش تراکنش‌های نماد انتخاب شده
-          this.renderSymbolTransactions(symbol);
-        }
-      } catch (error) {
-        alert(error.message);
-      }
-    };
+  // دکمه لغو ویرایش
+  const cancelBtn = document.createElement("button");
+  cancelBtn.textContent = "لغو ویرایش";
+  cancelBtn.className = "flex-1 p-2 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 duration-300";
 
-    this.transactionSymbolSelect.parentNode.insertBefore(updateBtn, this.buyBtn);
+  // دکمه ثبت ویرایش
+  const updateBtn = document.createElement("button");
+  updateBtn.textContent = "ثبت ویرایش";
+  updateBtn.className = "flex-1 p-2 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 duration-300";
+
+
+  // حذف دکمه‌های قبلی اگر وجود داشته باشد
+  const existingButtons = document.querySelector(".edit-transaction-buttons");
+  if (existingButtons) {
+    existingButtons.remove();
   }
+  buttonsContainer.classList.add("edit-transaction-buttons");
+
+  // رویدادهای دکمه‌ها
+  updateBtn.onclick = async () => {
+    const symbol = this.transactionSymbolSelect.value;
+    const amount = parseFloat(this.transactionAmountInput.value);
+    const price = parseFloat(this.transactionPriceInput.value);
+
+    try {
+      await this.transactionManager.updateTransaction(index, symbol, amount, price);
+      this.resetEditForm();
+      this.renderAll();
+      this.renderSymbolTransactions(symbol);
+      // نمایش تراکنش‌های نماد مربوطه
+      this.showSymbolTransactions(symbol);
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+
+  cancelBtn.onclick = () => {
+    this.resetEditForm();
+  };
+
+  buttonsContainer.appendChild(updateBtn);
+  buttonsContainer.appendChild(cancelBtn);
+
+  // اضافه کردن دکمه‌ها به فرم
+  const formActions = document.querySelector(".transaction-form-actions");
+  if (formActions) {
+    formActions.prepend(buttonsContainer);
+  } else {
+    this.transactionSymbolSelect.parentNode.insertBefore(buttonsContainer, this.buyBtn);
+  }
+
+  // اسکرول به بخش معاملات نماد
+  this.showSymbolTransactions(transaction.symbol);
+}
+
+// متد جدید برای نمایش تراکنش‌های نماد
+showSymbolTransactions(symbol) {
+  this.transactionSymbolSelect.value = symbol;
+  this.transactionSymbolSelect.dispatchEvent(new Event("change"));
+  document.querySelector(".transaction-box").scrollIntoView({ behavior: "smooth" });
+}
+
+// متد جدید برای بازنشانی فرم ویرایش
+resetEditForm() {
+  this.clearTransactionInputs();
+  this.transactionSymbolSelect.disabled = false;
+  
+  const editButtons = document.querySelector(".edit-transaction-buttons");
+  if (editButtons) editButtons.remove();
+  
+  this.buyBtn.style.display = "block";
+  this.sellBtn.style.display = "block";
+}
 
   renderAll() {
     const currentSymbol = this.transactionSymbolSelect.value;
@@ -243,18 +299,23 @@ class TradingApp {
 
   renderTransactionHistory() {
     this.transactionHistory.innerHTML = "";
-    const transactions = [...this.transactionManager.getAllTransactions()].reverse().map((t, index) => ({ ...t, originalIndex: index }));
-
+    const transactions = this.transactionManager.getAllTransactions();
+    
     if (transactions.length === 0) {
       this.transactionHistory.innerHTML = '<p class="text-gray-500 p-1 text-xs">معامله‌ای ثبت نشده است.</p>';
       return;
     }
-
-    transactions.forEach((transaction) => {
+  
+    // نمایش معاملات از جدید به قدیم اما با حفظ ایندکس اصلی
+    for (let i = transactions.length - 1; i >= 0; i--) {
+      const transaction = transactions[i];
       const transactionItem = document.createElement("div");
-      transactionItem.innerHTML = this.getTransactionTemplate(transaction, true);
+      transactionItem.innerHTML = this.getTransactionTemplate({
+        ...transaction,
+        originalIndex: i // ذخیره ایندکس اصلی
+      }, true);
       this.transactionHistory.appendChild(transactionItem);
-    });
+    }
   }
 
   renderSymbolTransactions(symbol) {
@@ -342,7 +403,7 @@ class TradingApp {
     portfolioItem.addEventListener("click", () => {
       this.transactionSymbolSelect.value = symbol;
       this.transactionSymbolSelect.dispatchEvent(new Event("change"));
-      document.querySelector("#transactionSymbol").scrollIntoView({
+      document.querySelector(".transaction-box").scrollIntoView({
         behavior: "smooth",
       });
     });
@@ -397,12 +458,12 @@ class TradingApp {
     if (currentPrice && !data.isSoldOut) {
       const profitLoss = (currentPrice - avgPrice) * amount;
       portfolioItem.innerHTML += `
-      <div>
+      <div class="text-gray-500">
         <span>قیمت روز:</span>
         <span class="text-left">${currentPrice.toLocaleString()} | </span>
-        <span class="${profitLoss >= 0 ? "text-green-500" : "text-red-500"}">
+        <span class="">
+          ${profitLoss >= 0 ? "سود:" : "زیان:"}
           ${Math.abs(profitLoss).toLocaleString()}
-          ${profitLoss >= 0 ? "(سود)" : "(زیان)"}
         </span>
       </div>
       `;
