@@ -1,25 +1,16 @@
-name: Deploy to FTP
-
-on:
-  push:
-    branches:
-      - main # این بخش مشخص می‌کند که با هر Push روی شاخه اصلی، Workflow اجرا شود.
-
+name: Deploy website on push
+on: push
 jobs:
-  ftp-deploy:
+  web-deploy:
+    name: Deploy
     runs-on: ubuntu-latest
-
     steps:
-      # Checkout the repository
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-
-      # Deploy files to FTP server
-      - name: Deploy to FTP Server
-        uses: meladsharafi/VirtualPortfolio@0.0.1
-        with:
+    - name: Get latest code
+      uses: actions/checkout@v1
+    
+    - name: Deploy to FTP Server
+      uses: meladsharafi/VirtualPortfolio
+      with:
           server: ${{ secrets.FTP_SERVER }} # آدرس سرور FTP
           username: ${{ secrets.FTP_USERNAME }} # نام کاربری FTP
           password: ${{ secrets.FTP_PASSWORD }} # رمز عبور FTP
-          local-dir: ./ # مسیر محلی برای آپلود (ریشه پروژه)
-          server-dir: /public_html/ # مسیر مقصد روی سرور
