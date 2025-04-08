@@ -1,16 +1,21 @@
 name: Deploy website on push
-on: push
+
+on:
+  push:
+    branches:
+      - main  
+      
 jobs:
   web-deploy:
     name: Deploy
     runs-on: ubuntu-latest
     steps:
-    - name: Get latest code
-      uses: actions/checkout@latest
-    
-    - name: Deploy to FTP Server
-      uses: meladsharafi/VirtualPortfolio
-      with:
-          server: ${{ secrets.FTP_SERVER }} # آدرس سرور FTP
-          username: ${{ secrets.FTP_USERNAME }} # نام کاربری FTP
-          password: ${{ secrets.FTP_PASSWORD }} # رمز عبور FTP
+      - name: Get latest code
+        uses: actions/checkout@v3
+
+      - name: Deploy to FTP Server
+        uses: meladsharafi/VirtualPortfolio@main
+        with:
+          server: ${{ secrets.FTP_SERVER }} 
+          username: ${{ secrets.FTP_USERNAME }} 
+          password: ${{ secrets.FTP_PASSWORD }}
