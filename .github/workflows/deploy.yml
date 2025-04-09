@@ -1,21 +1,18 @@
-name: 🚀 Deploy website on push
+name: FTP Deploy
+on: [push]
 
-on:
-  push:
-    branches:
-      - main  
-      
 jobs:
-  web-deploy:
-    name: Deploy
+  deploy:
     runs-on: ubuntu-latest
     steps:
-      - name:  🚚 Get latest code
-        uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: 📂 Deploy to FTP Server
+      - name: FTP Deploy
         uses: SamKirkland/FTP-Deploy-Action@v4
         with:
-          server: ${{ secrets.FTP_SERVER }} 
-          username: ${{ secrets.FTP_USERNAME }} 
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./  # مسیر فایل‌های پروژه (ریشه ریپوزیتوری)
+          server-dir: /public_html/  # مسیر در هاست (مطابق تنظیمات FTP هاست شما)
