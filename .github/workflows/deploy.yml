@@ -21,6 +21,8 @@ jobs:
           server: ${{ secrets.FTP_SERVER }} 
           username: ${{ secrets.FTP_USERNAME }} 
           password: ${{ secrets.FTP_PASSWORD }}
-          exclude: |          
-          
-
+          # local-dir: './public'
+          server-dir: '/apps/virtual-portfolio/'
+          # exclude: |
+            # .env
+            # /node_modules/
